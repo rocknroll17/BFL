@@ -26,8 +26,9 @@ RUN pip install --no-build-isolation "git+https://github.com/facebookresearch/py
 
 WORKDIR /workspace/BFL
 COPY requirements.txt .
+# chumpy from git: the PyPI release (0.70) does not import with NumPy >= 1.24.
 RUN pip install -r requirements.txt \
-    && pip install --no-build-isolation chumpy==0.70
+    && pip install --no-build-isolation "git+https://github.com/mattloper/chumpy.git@51d5afd92a8ded3637553be8cef41f328a1c863a"
 
 # Code; the AniMer+ submodule must be checked out (git clone --recursive, or git submodule update --init).
 COPY . .

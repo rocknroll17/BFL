@@ -51,7 +51,7 @@ conda create -n bfl python=3.10 -y && conda activate bfl
 pip install torch==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cu121
 pip install --no-build-isolation "git+https://github.com/facebookresearch/pytorch3d.git@V0.7.8"
 pip install -r requirements.txt
-pip install --no-build-isolation chumpy==0.70
+pip install --no-build-isolation "git+https://github.com/mattloper/chumpy.git@51d5afd92a8ded3637553be8cef41f328a1c863a"
 ```
 
 AniMer+ is a git submodule (`third_party/AniMerPlus`, pinned, unmodified) and is used from source, so it
