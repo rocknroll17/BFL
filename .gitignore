@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.vscode/
+.idea/
+.DS_Store
+
+# checkpoints, archives, logs
+*.pt
+*.ckpt
+*.pth
+*.pkl
+*.zip
+*.tar
+*.tar.gz
+*.log
+
+# datasets live inside the AniMer+ submodule
+third_party/AniMerPlus/data/
+
+# run outputs
+outputs/
+exported/
+demo_out/

@@ -1,0 +1,104 @@
+# Every fine-tuning run of the paper, by name:  python train.py --variant <name>
+#
+# All runs start from the released AniMer+ checkpoint and fine-tune on the CtrlAVES3D
+# train split (6 464 images, 17 species) for 30 000 steps, batch 4, AdamW, lr 3e-7, fp32.
+#
+# Keys
+#   ou_weight              lambda_OU (0 = OU prior off)
+#   supcon_weight          weight of AniMer+'s family-contrastive loss L_con (0 = off)
+#   ou_lr_multiplier       k: the OU scalars (alpha, sigma, mu) train at k x lr
+#   ou_weight_decay        weight decay of the OU scalars
+#   use_cosine_lr          cosine schedule down to lr / 100; otherwise constant lr
+#   phylo_matrix_override  taxonomic distance matrix D_tax to use instead of common.phylo_matrix
+#   seed                   random seed (python, numpy, torch); 0 if absent
+#
+# Where each run appears in the paper
+#   table1_seed{0,7,21,42,123}        Table 1 (mean +- s.d.), Table 3 (3D, seed 0), Fig. 4, Table S6
+#   table1_no_ou                      OU off, AniMer+'s L_con on: "no OU" bars of Fig. 4
+#   table1_permuted_seed*             headline setting with the label-permuted D_tax (appendix)
+#   sec43_real, sec43_permuted        Fig. 3 (Sec. 4.3) and the full / permuted rows of Table 2.
+#                                     The two original runs were trained before seeds were fixed;
+#                                     re-training them uses seed 0 and does not give the same
+#                                     numbers. Their original checkpoints are released.
+#   sec43_{real,permuted}_seed*       the same two settings at fixed seeds
+#   table2_family_only, table2_order_only   Table 2 (Sec. 4.4), seed 0
+#   lambda_*                          lambda_OU sweep, constant lr (appendix; lambda 1e-4 = sec43_real)
+#   k_*                               OU-lr multiplier ablation (appendix Table S8)
+
+common:
+  total_steps: 30000
+  batch_size: 4
+  lr: 3.0e-7
+  log_steps: 100
+  num_workers: 4
+  phylo_matrix: "data/phylogeny/phylo_distance_matrix.npy"
+  cub_mapping: "data/phylogeny/cub_category_mapping.json"
+  pretrained_checkpoint: "third_party/AniMerPlus/data/AniMerPlus/checkpoint.ckpt"
+
+# ---- shared settings (YAML anchors; each variant below overrides only what differs)
+_headline: &headline            # cosine lr, lambda_OU = 1e-5, k = 100, L_con off
+  ou_weight: 1.0e-5
+  supcon_weight: 0.0
+  ou_lr_multiplier: 100.0
+  ou_weight_decay: 0.0
+  use_cosine_lr: true
+  seed: 0
+_strong: &strong                # constant lr, lambda_OU = 1e-4, k = 100, L_con off
+  ou_weight: 1.0e-4
+  supcon_weight: 0.0
+  ou_lr_multiplier: 100.0
+  ou_weight_decay: 0.0
+  use_cosine_lr: false
+  seed: 0
+_permuted: &permuted "data/phylogeny/phylo_distance_matrix_permuted.npy"
+
+variants:
+  # ---- Table 1: headline operating point, five seeds
+  table1_seed0:   {<<: *headline, seed: 0}
+  table1_seed7:   {<<: *headline, seed: 7}
+  table1_seed21:  {<<: *headline, seed: 21}
+  table1_seed42:  {<<: *headline, seed: 42}
+  table1_seed123: {<<: *headline, seed: 123}
+
+  # ---- headline controls
+  table1_no_ou:                 # OU off; AniMer+'s family-contrastive loss at its original weight
+    <<: *headline
+    ou_weight: 0.0
+    supcon_weight: 0.0005
+    ou_lr_multiplier: 0.1
+    ou_weight_decay: 0.0001
+  table1_permuted_seed0:   {<<: *headline, phylo_matrix_override: *permuted, seed: 0}
+  table1_permuted_seed7:   {<<: *headline, phylo_matrix_override: *permuted, seed: 7}
+  table1_permuted_seed21:  {<<: *headline, phylo_matrix_override: *permuted, seed: 21}
+  table1_permuted_seed42:  {<<: *headline, phylo_matrix_override: *permuted, seed: 42}
+  table1_permuted_seed123: {<<: *headline, phylo_matrix_override: *permuted, seed: 123}
+
+  # ---- Sec. 4.3 (Fig. 3) and Table 2: real vs. permuted D_tax, strong-prior setting
+  sec43_real:     {<<: *strong}
+  sec43_permuted: {<<: *strong, phylo_matrix_override: *permuted}
+  sec43_real_seed7:       {<<: *strong, seed: 7}
+  sec43_real_seed21:      {<<: *strong, seed: 21}
+  sec43_real_seed42:      {<<: *strong, seed: 42}
+  sec43_real_seed123:     {<<: *strong, seed: 123}
+  sec43_permuted_seed7:   {<<: *strong, phylo_matrix_override: *permuted, seed: 7}
+  sec43_permuted_seed21:  {<<: *strong, phylo_matrix_override: *permuted, seed: 21}
+  sec43_permuted_seed42:  {<<: *strong, phylo_matrix_override: *permuted, seed: 42}
+  sec43_permuted_seed123: {<<: *strong, phylo_matrix_override: *permuted, seed: 123}
+
+  # ---- Table 2 (Sec. 4.4): rank granularity of D_tax
+  table2_family_only: {<<: *strong, phylo_matrix_override: "data/phylogeny/phylo_distance_matrix_family_only.npy"}
+  table2_order_only:  {<<: *strong, phylo_matrix_override: "data/phylogeny/phylo_distance_matrix_order_only.npy"}
+
+  # ---- appendix: lambda_OU sweep (constant lr, k = 100, real D_tax)
+  lambda_1e-5: {<<: *strong, ou_weight: 1.0e-5}
+  lambda_5e-5: {<<: *strong, ou_weight: 5.0e-5}
+  lambda_5e-4: {<<: *strong, ou_weight: 5.0e-4}
+  lambda_1e-3: {<<: *strong, ou_weight: 1.0e-3}
+  lambda_5e-4_permuted: {<<: *strong, ou_weight: 5.0e-4, phylo_matrix_override: *permuted}
+
+  # ---- appendix: OU-lr multiplier k (lambda_OU = 1e-4 for k <= 100, 5e-4 for k >= 300)
+  k_1:    {<<: *strong, ou_lr_multiplier: 1.0}
+  k_10:   {<<: *strong, ou_lr_multiplier: 10.0}
+  k_30:   {<<: *strong, ou_lr_multiplier: 30.0}
+  k_300:  {<<: *strong, ou_weight: 5.0e-4, ou_lr_multiplier: 300.0}
+  k_1000: {<<: *strong, ou_weight: 5.0e-4, ou_lr_multiplier: 1000.0}

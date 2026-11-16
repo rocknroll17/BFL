@@ -1,0 +1,22 @@
+# docker compose -f docker/docker-compose.yml up -d --build
+# docker compose -f docker/docker-compose.yml exec bfl bash
+services:
+  bfl:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: bfl:latest
+    working_dir: /workspace/BFL
+    volumes:
+      - ../third_party/AniMerPlus/data:/workspace/BFL/third_party/AniMerPlus/data   # datasets + AniMer+ checkpoint
+      - ../outputs:/workspace/BFL/outputs                                 # training / evaluation outputs
+      - ../checkpoints:/workspace/BFL/checkpoints                         # released checkpoints
+    shm_size: "16gb"            # PyTorch DataLoader workers share batches through /dev/shm
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

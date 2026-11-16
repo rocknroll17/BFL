@@ -1,0 +1,22 @@
+{
+  "description": "AniMer+ batch['category'] (CUB-200 class index) -> CtrlAVES3D species index 0..16, the row order of D_tax (see SPECIES in build_distance_matrix.py).",
+  "cub_category_to_folder_idx": {
+    "2": 0,
+    "16": 1,
+    "17": 2,
+    "29": 3,
+    "36": 4,
+    "41": 5,
+    "49": 6,
+    "55": 7,
+    "59": 8,
+    "73": 9,
+    "80": 10,
+    "83": 11,
+    "87": 12,
+    "106": 13,
+    "110": 14,
+    "186": 15,
+    "188": 16
+  }
+}

@@ -1,0 +1,33 @@
+# Evaluation sets (read by eval.py; paths are relative to third_party/AniMerPlus/).
+# CONFIG and METRIC are AniMer+'s evaluation settings (amr/configs_hydra/experiment/default_val.yaml).
+DATASETS:
+  CUB:              # CUB-200-2011 official test split, 5,794 images
+    ROOT_IMAGE: data/CUB/CUB_200_2011
+    JSON_FILE:
+      TEST: data/CUB/test_official.json
+  CUB_TRAIN:        # CUB-200-2011 official training split, 5,994 images (development list only)
+    ROOT_IMAGE: data/CUB/CUB_200_2011
+    JSON_FILE:
+      TEST: data/CUB/train_split.json
+  COWBIRD:          # CowBird, 114 annotated instances of unseen species
+    ROOT_IMAGE: data/CowBird/cowbird
+    JSON_FILE:
+      TEST: data/CowBird/cowbird_eval/test.json
+  CTRLANI3DPLUS:    # CtrlAVES3D test split, 309 images
+    ROOT_IMAGE: data/control_animal3d_plus
+    JSON_FILE:
+      TEST: data/control_animal3d_plus/test.json
+  CONFIG:
+    SCALE_FACTOR: 0.0
+    ROT_FACTOR: 0
+    TRANS_FACTOR: 0.0
+    COLOR_SCALE: 0.0
+    ROT_AUG_RATE: 0.0
+    TRANS_AUG_RATE: 0.0
+    DO_FLIP: False
+    FLIP_AUG_RATE: 0.0
+    EXTREME_CROP_AUG_RATE: 0.0
+    EXTREME_CROP_AUG_LEVEL: 1
+
+METRIC:
+  PCK_THRESHOLD: [0.10, 0.15]

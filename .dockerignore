@@ -1,0 +1,10 @@
+.git
+**/__pycache__
+outputs
+exported
+checkpoints
+demo_out
+third_party/AniMerPlus/data
+*.pt
+*.ckpt
+*.pth
